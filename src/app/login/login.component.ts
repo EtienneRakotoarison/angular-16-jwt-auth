@@ -25,7 +25,7 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     if (this.storageService.isLoggedIn()) {
       this.isLoggedIn = true;
-      this.roles = this.storageService.getUser().roles;
+      this.roles = this.storageService.getUser().pseudo;
     }
   }
 
@@ -40,7 +40,8 @@ export class LoginComponent implements OnInit {
             this.isLoginFailed = false;
             this.errorMessage = '';
             this.isLoggedIn = true;
-            this.roles = this.storageService.getUser()[0].pseudo;
+            this.roles = this.storageService.getUser().pseudo;
+            window.location.reload();
           },
           error: (err) => {
             console.error('Erreur lors de la récupération des informations utilisateur', err);

@@ -28,16 +28,12 @@ export class AppComponent {
     this.isLoggedIn = this.storageService.isLoggedIn();
 
     if (this.isLoggedIn) {
-      const user = this.storageService.getUser()[0];
-      console.log(user);
-      
-      // this.roles = user.roles;
+      const user = this.storageService.getUser();
+      this.username = user.fullname;
+      this.roles = user.roles;
 
       // this.showAdminBoard = this.roles.includes('ROLE_ADMIN');
       // this.showModeratorBoard = this.roles.includes('ROLE_MODERATOR');
-
-      // this.username = user.email;
-      // console.log(this.roles[0]);
     }
 
     this.eventBusSub = this.eventBusService.on('logout', () => {
@@ -46,16 +42,14 @@ export class AppComponent {
   }
 
   logout(): void {
-    this.authService.logout().subscribe({
-      next: res => {
-        console.log(res);
+    // this.authService.logout().subscribe({
+    //   next: res => {
         this.storageService.clean();
-
         window.location.reload();
-      },
-      error: err => {
-        console.log(err);
-      }
-    });
+      // },
+      // error: err => {
+      //   console.log(err);
+      // }
+    // });
   }
 }
