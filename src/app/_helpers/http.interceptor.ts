@@ -9,41 +9,38 @@ import { EventData } from '../_shared/event.class';
 
 @Injectable()
 export class HttpRequestInterceptor implements HttpInterceptor {
-  private isRefreshing = false;
-
   constructor(private storageService: StorageService, private eventBusService: EventBusService) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    req = req.clone({
-      withCredentials: true,
-    });
+    let authReq = req;
 
-    return next.handle(req).pipe(
+    const token = this.storageService.getToken();
+    if (token) {
+      authReq = req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    }
+
+    return next.handle(authReq).pipe(
       catchError((error) => {
-        // logout when token is expired
-/*
         if (
           error instanceof HttpErrorResponse &&
           !req.url.includes('auth/signin') &&
           error.status === 401
         ) {
-          return this.handle401Error(req, next);
+          return this.handle401Error(authReq, next);
         }
-*/
         return throwError(() => error);
       })
     );
   }
 
   private handle401Error(request: HttpRequest<any>, next: HttpHandler) {
-    if (!this.isRefreshing) {
-      this.isRefreshing = true;
-
-      if (this.storageService.isLoggedIn()) {
-        this.eventBusService.emit(new EventData('logout', null));
-      }
+    if (this.storageService.isLoggedIn()) {
+      this.eventBusService.emit(new EventData('logout', null));
     }
-
     return next.handle(request);
   }
 }
