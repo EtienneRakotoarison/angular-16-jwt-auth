@@ -11,7 +11,6 @@ import { User } from '../models/models';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  userLogged?: User;
   form: any = {
     username: 'etienne@instapic.com',
     password: 'password'
@@ -19,7 +18,7 @@ export class LoginComponent implements OnInit {
   isLoggedIn = false;
   isLoginFailed = false;
   errorMessage = '';
-  roles: string[] = [];
+  roles?: string;
 
   constructor(private authService: AuthService, private storageService: StorageService, private userService: UserService, private http: HttpClient) { }
 
@@ -38,29 +37,20 @@ export class LoginComponent implements OnInit {
         this.userService.getConnectedUserInfo(username, password).subscribe({
           next: (data) => {
             this.storageService.saveUser(data);
+            this.isLoginFailed = false;
+            this.errorMessage = '';
+            this.isLoggedIn = true;
+            this.roles = this.storageService.getUser()[0].pseudo;
           },
           error: (err) => {
             console.error('Erreur lors de la récupération des informations utilisateur', err);
           }
         });
-        
-
-        this.isLoginFailed = false;
-        this.errorMessage = '';
-        // this.isLoggedIn = true;
-        // this.roles = this.storageService.getUser().roles;
-        console.log(this.storageService.getUser());
-        // console.log(this.roles);
-        // this.reloadPage();
       },
       error: err => {
         this.errorMessage = err.error.message;
         this.isLoginFailed = true;
       }
     });
-  }
-
-  reloadPage(): void {
-    window.location.reload();
   }
 }
